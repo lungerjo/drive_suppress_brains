@@ -48,11 +48,12 @@ The `src` folder contains all code in the following subfolders:
 -  `statistics` contains linear mixed effect (LME) statistics (in R).
 
 ## Downloading data
-To download data used in the paper, run the [download_files.py](https://github.com/gretatuckute/drive_suppress_brains/blob/main/setup_utils/download_files.py) script. By default, it will download the files for the `data` folder. 
+To download data used in the paper, download files in the associated [OSF repository](https://osf.io/ru38b). If you are interested in the core analyses, just download the `data` folder (~28 MB). The folder needs to be untarred. 
 
 The `data` folder contains a csv file with the event-related data (_brain-lang-data_participant_20230728.csv_; main experiment). This file contains brain responses for the left hemisphere (LH) language regions for n=10 participants (n=5 _train_ participants, n=5 _evaluation_ participants) along with various metadata and behavioral data for each sentence (n=10 linguistic properties). The `data` folder also contains a csv file with brain responses for the blocked experiment (_brain-lang-blocked-data_participant_20230728.csv_, n=4 _evaluation_ participants). The folder also contains the noise ceilings computed based on the event-related data on n=5 _train_ participants (_NC-allroi-data.csv_). Finally, the file _column_name_descriptions.csv_ contains descriptions of the content of the columns in these csv files.
 
-Using the additional flags, you can specify whether you want to download the `data_SI` files, the `model-actv` files, and the `regr-weights` files. 
+The additional folders besides `data` are: `data_SI` (~300 MB), `model-actv` (~1.5 GB), and `regr-weights` (~80 KB). Organize the folders according to the Repository organization outlined above.
+
 
 ## Analyzing data and generating plots
 All code is in `src`. 
