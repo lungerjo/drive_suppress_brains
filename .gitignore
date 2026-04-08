@@ -11,7 +11,7 @@ results
 model-actv
 regr-weights
 src/statistics/**/*[.docx]
-
+setup_utils
 
 .vscode/*
 
