@@ -6,21 +6,30 @@
 \usepackage{booktabs}
 \usepackage{enumitem}
 \usepackage{xcolor}
-\usepackage[numbers,sort&compress]{natbib}  % drop "numbers" for author-year citations
+\usepackage[super,sort&compress]{natbib} % drop "numbers" for author-year citations
 \usepackage[colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue]{hyperref}
 
 \setlist{itemsep=2pt, topsep=4pt}
 
-\title{Learning human language network features from intra-cortical BCI with large language models}
+\title{Learning single-cell human language network features with large language models}
 \date{}
 \author{}
 
 \begin{document}
 \maketitle
 
+\section{Introduction}
+The encoding of phonemes from recorded neural activity in the motor cortex has enabled the restoration of rapid communication to people with paralysis during both attempted and inner speech  \cite{willett2023speech}\cite{kunz2025innerspeech}. Increasingly, semantic encoding has been explored from recorded activity in language-related areas in the frontal and temporal cortex \cite{jamali2024semantic}\cite{cai2026language}, potentially unlocking speech-prosthetics in people with aphasia. One challenge unique to understanding semantic encoding is that unlike phonemes, the space of possible sentences and meanings is very large. Previous approaches have leveraged large language models to evaluate millions of sentences and extract those most likely to drive and suppress neural activity in fMRI \cite{tuckute2023driving}. Here, we adapt this technique in order to efficiently recover semantic features from single-cell recordings in the human language network.
 
+\section{Driving and suppressing language network fMRI with LLMs}
 
-\bibliographystyle{plainnat}
+The hidden activations of large language models have been shown to predict nearly all explainable variance in neural responses to sentences across multiple imaging modalities \cite{schrimpf2021neural}. \citet{tuckute2023driving} used these hidden activations to evaluate millions of sentences and extract those most likely to drive and suppress neural activity in fMRI. In that work, BOLD responses were acquired from five train participants who read a set of 1,000 diverse, corpus-extracted sentences and an  encoding model was trained via ridge regression and achieved a prediction performance of $r=.39$ (the noise ceiling is $r=.56$) when evaluated on average BOLD activity from the left-hemisphere language network during held-out sentences within the baseline set. Approximately 1.8 million sentences from nine diverse large-scale text corpora were evaluated and a set of 250 sentences extracted  that were predicted to elicit maximally strong activity in the language network.
+
+\section{Interpretable and information-optimal regression targets}
+
+Due to the low spatial and temporal resolution of fMRI, fine-grained properties cannot be targeted beyond general increases in average BOLD response to entire sentences. A major aim of studying semantic encoding in the human language network is to uncover how the brain tunes to semantic structure at the level of individual neurons and semantic dynamics with a single-sentence. Therefore, we introduce interpretable and information optimal regression targets that will help uncover bio-mechanistically interpretable structure in language space.
+
+\bibliographystyle{unsrtnat}
 \bibliography{refs}
 
 \end{document}
