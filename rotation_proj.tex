@@ -6,14 +6,10 @@
 \usepackage{booktabs}
 \usepackage{enumitem}
 \usepackage{xcolor}
+\usepackage[numbers,sort&compress]{natbib}  % drop "numbers" for author-year citations
 \usepackage[colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue]{hyperref}
 
 \setlist{itemsep=2pt, topsep=4pt}
-
-% Inline markers for notes-in-progress
-\newcommand{\todo}[1]{\textcolor{red}{\textbf{TODO:} #1}}
-\newcommand{\q}[1]{\textcolor{blue}{\textbf{Q:} #1}}
-\newcommand{\idea}[1]{\textcolor{teal}{\textbf{Idea:} #1}}
 
 \title{Learning human language network features from intra-cortical BCI with large language models}
 \date{}
@@ -23,5 +19,8 @@
 \maketitle
 
 
+
+\bibliographystyle{plainnat}
+\bibliography{refs}
 
 \end{document}
