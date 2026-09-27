@@ -11,7 +11,7 @@
 
 \setlist{itemsep=2pt, topsep=4pt}
 
-\title{Learning single-cell human language network features with large language models}
+\title{Probing intracortical recordings from human speech and language areas with large language models}
 \date{}
 \author{}
 
@@ -19,7 +19,7 @@
 \maketitle
 
 \section{Introduction}
-The encoding of phonemes from recorded neural activity in the motor cortex has enabled the restoration of rapid communication to people with paralysis during both attempted and inner speech  \cite{willett2023speech}\cite{kunz2025innerspeech}. Increasingly, semantic encoding has been explored from recorded activity in language-related areas in the frontal and temporal cortex \cite{jamali2024semantic}\cite{cai2026language}, potentially unlocking speech-prosthetics in people with aphasia. One challenge unique to understanding semantic encoding is that unlike phonemes, the space of possible sentences and meanings is very large. Previous approaches have leveraged large language models to evaluate millions of sentences and extract those most likely to drive and suppress neural activity in fMRI \cite{tuckute2023driving}. Here, we adapt this technique in order to efficiently recover semantic features from single-cell recordings in the human language network.
+Decoding phonemes from neural activity recorded in motor cortex has enabled the restoration of rapid communication to people with paralysis during both attempted and inner speech  \cite{willett2023speech}\cite{kunz2025innerspeech}. Increasingly, semantic encoding has been explored from recorded activity in language-related areas in the frontal and temporal cortex \cite{jamali2024semantic}\cite{cai2026language}, potentially unlocking speech-prosthetics in people with aphasia. One challenge unique to understanding semantic encoding is that unlike phonemes, the space of possible sentences and meanings is very large. Previous approaches have leveraged large language models to evaluate millions of sentences and extract those most likely to drive and suppress neural activity in fMRI \cite{tuckute2023driving}. Here, we take a first step toward adapting this technique to intracortical recordings. Using multi-unit activity recorded during attempted speech from ventral premotor cortex (area 6v) and inferior frontal gyrus (area 44) \cite{willett2023speech}, we test whether LLM features predict neural activity beyond what they encode about the words being articulated. This is a prerequisite for designing sentences that drive or suppress individual neurons in the language network.
 
 \section{Driving and suppressing language network fMRI with LLMs}
 
@@ -28,6 +28,100 @@ The hidden activations of large language models have been shown to predict nearl
 \section{Interpretable and information-optimal regression targets}
 
 Due to the low spatial and temporal resolution of fMRI, fine-grained properties cannot be targeted beyond general increases in average BOLD response to entire sentences. A major aim of studying semantic encoding in the human language network is to uncover how the brain tunes to semantic structure at the level of individual neurons and semantic dynamics with a single-sentence. Therefore, we introduce interpretable and information optimal regression targets that will help uncover bio-mechanistically interpretable structure in language space.
+
+\section{Pilot: LLM encoding of intracortical speech recordings}
+
+As a first test of whether LLM features predict intracortical activity beyond what they encode about the words being produced, we fit GPT2-XL \cite{radford2019language} encoding models to the speech BCI dataset of \citet{willett2023speech}.
+
+\subsection{Data}
+Participant T12 attempted to speak 9,680 sentences (9,562 unique) across 24 sessions, in the dataset's train and test partitions. Activity was recorded on four 64-electrode Utah arrays: two in area 6v (ventral premotor cortex, channels 0--127) and two in area 44 (inferior frontal gyrus, part of Broca's area, channels 128--255). We used two signals in 20\,ms bins: threshold crossings at $-4.5\times$RMS (\texttt{tx1}) and spike-band power. These are unsorted multi-unit signals, not isolated single neurons. Each trial comprised an instructed delay (about 8\,s, sentence on screen) followed by a go cue and the attempted-speech period. Results below are for \texttt{tx1}; spike-band power gave the same pattern.
+
+\subsection{Sentence-level encoding}
+Following \citet{tuckute2023driving}, we first reduced each channel to one number per sentence: its mean activity over the attempted-speech period, z-scored within session, with repeated sentences averaged. We predicted this from the GPT2-XL layer-22 representation of the sentence's last token (ridge regression, per-target regularization, 5-fold cross-validation). To separate GPT from sentence length, we fit a length-only model (words, tokens, characters, duration, speaking rate), then fit GPT to its training residual. We report the partial correlation between GPT's prediction and the held-out length residual. A model with sentence order shuffled served as the null.
+
+\begin{table}[h]
+\centering
+\caption{Sentence-level encoding: cross-validated Pearson $r$ for the mean activity of each area (\texttt{tx1}). The last column applies the fMRI language-network encoding model of \citet{tuckute2023driving} without refitting.}
+\label{tab:sentence}
+\begin{tabular}{lccccc}
+\toprule
+Area & Length & GPT & GPT $\mid$ length & Shuffled null & fMRI model (no fit) \\
+\midrule
+6v & 0.101 & 0.109 & 0.112 & 0.017 & 0.002 \\
+44 & 0.025 & 0.072 & 0.068 & 0.017 & 0.048 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+GPT predicted both areas above the null after controlling for length, and 6v better than 44 (Table~\ref{tab:sentence}). Two observations limit what this shows. First, 6v is a speech-motor area, and a sentence's GPT representation also encodes which words and phonemes it contains. Second, averaging over a roughly 6\,s trial keeps mainly \emph{what} was said and discards \emph{when}. By contrast, the fMRI-derived language-network model transferred weakly to 44 and not at all to 6v. A sentence-level target cannot tell these explanations apart, so we built a time-resolved model.
+
+\subsection{Word-level, time-resolved encoding}
+
+\paragraph{Word alignment.} The dataset has no word timing. We ported the published baseline decoder RNN of \citet{willett2023speech} to PyTorch; its outputs match the original to about $10^{-5}$. We fitted new input layers for the five sessions the RNN was not trained on. The decoder reads area 6v only. For each trial we computed the most likely timing of the known phoneme sequence under the decoder's output by CTC forced alignment \cite{graves2006connectionist}. All trials aligned, giving 61,119 words. Greedy decoding gave a held-out phoneme error rate of 19\%.
+
+To check timing independently, we compared the aligned words with the audio envelope recorded during vocalized attempts. Across the 19 vocalized sessions, an indicator for ``inside an aligned word'' cross-correlated with the envelope at $r \approx 0.6$, peaking when the audio led the alignment by a median of 360\,ms. This offset follows from stamping each decoder frame at the end of its 640\,ms input window. We shifted all onsets by $-360$\,ms, so lag 0 is approximately acoustic word onset. Four non-vocal sessions and one session with unusable audio could not be checked this way.
+
+\paragraph{Model.} Following \citet{goldstein2022shared}, samples were words. For word $w$ with onset $t_w$, channel $c$ and lag $\tau \in [-1, 1]$\,s in 40\,ms steps, the target was
+\begin{equation}
+y_{w,c}(\tau) = \tilde{x}_c(t_w + \tau),
+\end{equation}
+where $\tilde{x}_c$ is the continuous recording, z-scored within recording block and smoothed with a 40\,ms Gaussian. Early lags can therefore reach into the delay period. A separate ridge model was fitted for each lag and channel, with 5-fold cross-validation grouped by sentence. Word features were:
+\begin{itemize}
+  \item \textbf{GPT}: the layer-22 state at the word's last sub-token, given only the sentence up to and including $w$.
+  \item \textbf{Static}: GPT2-XL's input token embedding of $w$ (identity, no context).
+  \item \textbf{Surprisal}: $-\log_2 p(w \mid \text{preceding words})$.
+  \item \textbf{Control}: an articulation and timing model. It comprised the first phoneme of $w$; phoneme counts of $w-1$, $w$ and $w+1$; phoneme count and duration of $w$; intervals to the neighbouring onsets; position in the sentence; and time since the go cue.
+  \item \textbf{Prev3}: the identity and timing of $w-1$ to $w-3$: their static embeddings (reduced to 200 principal components each), phoneme counts of $w-2$ and $w-3$, and time since their onsets.
+\end{itemize}
+For $X \mid B$ we fit $B$, fit $X$ to $B$'s training residual, and report the partial correlation between $X$'s prediction and $B$'s held-out residual. The null permuted GPT vectors among words with the same number of phonemes. The permuted vectors still work as a lookup table for word length, so this null also absorbs non-linear length effects.
+
+\begin{table}[h]
+\centering
+\caption{Word-level encoding: cross-validated $r$ (partial $r$ for $X \mid B$), averaged over the 128 channels of each area, at three lags from word onset (\texttt{tx1}).}
+\label{tab:lagged}
+\begin{tabular}{lcccccc}
+\toprule
+ & \multicolumn{3}{c}{Area 6v} & \multicolumn{3}{c}{Area 44} \\
+\cmidrule(lr){2-4}\cmidrule(lr){5-7}
+Model & $-1000$ & $0$ & $+600$\,ms & $-1000$ & $0$ & $+600$\,ms \\
+\midrule
+Control & 0.219 & 0.241 & 0.225 & 0.035 & 0.041 & 0.041 \\
+GPT & 0.198 & 0.185 & 0.160 & 0.042 & 0.044 & 0.037 \\
+\midrule
+GPT $\mid$ control & 0.084 & 0.072 & 0.046 & 0.025 & 0.022 & 0.018 \\
+Static $\mid$ control & 0.040 & 0.077 & 0.040 & 0.012 & 0.015 & 0.011 \\
+GPT $\mid$ control + static & 0.088 & 0.042 & 0.033 & 0.026 & 0.022 & 0.019 \\
+Prev3 $\mid$ control + static & 0.123 & 0.032 & 0.020 & 0.023 & 0.015 & 0.010 \\
+GPT $\mid$ control + static + prev3 & 0.039 & 0.029 & 0.029 & 0.021 & 0.019 & 0.017 \\
+Surprisal $\mid$ control & 0.003 & 0.007 & 0.004 & 0.007 & 0.006 & 0.005 \\
+Null $\mid$ control + static + prev3 & 0.000 & 0.001 & 0.002 & 0.000 & 0.001 & 0.000 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\paragraph{Results.} Table~\ref{tab:lagged} summarizes the results.
+\begin{enumerate}
+  \item \textbf{Most of GPT's predictive power in 6v is articulation.} For the mean activity of 6v, the control model reached $r = 0.62$ at its best lag and GPT alone $r = 0.52$. Most of GPT's contribution overlapped with the control.
+  \item \textbf{An apparent pre-onset effect reflected earlier words.} With the current word's sounds and identity controlled, GPT's contribution in 6v was largest one second \emph{before} word onset ($r = 0.088$, falling to 0.042 at onset). That timing would fit prediction or planning. However, at $-1$\,s the participant is still articulating words $w-2$ and $w-3$, which GPT's causal state encodes. Adding prev3 to the control halved the effect at $-1$\,s and removed the pre-onset peak. Prev3 alone explained more than GPT had at those lags.
+  \item \textbf{The remaining contribution is small and not word-locked.} After all controls, GPT added $r \approx 0.03$ in 6v and $r \approx 0.02$ in 44, nearly constant across lags, against a null of about 0.001. The per-channel peak exceeded the null's 95th percentile in 128/128 channels in 6v and 113/128 in 44. Word-by-word processing should produce a response that rises and falls around each word, so a flat profile instead suggests a slow, trial-level component that correlates with GPT features.
+  \item \textbf{Surprisal contributed essentially nothing} ($r < 0.01$) in either area. Consistent with \citet{willett2023speech}, area 44 carried little speech-related information of any kind.
+\end{enumerate}
+
+\subsection{Interpretation and limitations}
+In these recordings, GPT features predict activity mostly because they describe \emph{what is being said}, which a speech-motor area tracks closely. The time-resolved model confirms, rather than overturns, the limitation of the sentence-level result. This is not evidence against language-related coding in these areas: the task is speech production, and the arrays were placed for decoding. But we have not yet shown any GPT contribution beyond articulation. Specific caveats:
+\begin{itemize}
+  \item The flat residual could be a confound. Sentence corpora differ between recording blocks and are easy for GPT to tell apart; speaking rate, effort or slow drift that covaries with corpus would appear as a GPT effect. With 61k words, $r = 0.03$ is easily detected, and the null rules out chance, not confounds.
+  \item Word onsets come from a decoder that reads 6v only, which favors 6v in any onset-locked analysis. The $-360$\,ms shift is a single global correction, and alignment jitter (about one 80\,ms decoder frame) blurs the lag profiles.
+  \item The controls are linear and cover three preceding words. The null is a single permutation, and the prev3 models were run on \texttt{tx1} only.
+\end{itemize}
+
+\subsection{Next steps}
+\begin{itemize}
+  \item Test the flat residual: remove each trial's mean activity before fitting, and add recording-block and corpus indicators to the control.
+  \item Analyze the delay period, when the participant reads the sentence without moving. It removes the articulation confound and needs no alignment.
+  \item Use non-linear articulatory controls and longer preceding context, with repeated permutations for the null.
+\end{itemize}
+Together these determine whether intracortical speech-motor and inferior frontal recordings contain LLM-predictable structure beyond articulation. They are a prerequisite for designing driving and suppressing sentences for single-neuron recordings in the language network.
 
 \bibliographystyle{unsrtnat}
 \bibliography{refs}
