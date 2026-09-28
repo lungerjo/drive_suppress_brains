@@ -36,7 +36,7 @@ Due to the low spatial and temporal resolution of fMRI, fine-grained properties 
 
 Participant T12 from the brain-gate consortium\cite{willett2023speech} attempted to speak 9,680 sentences (9,562 unique) across 24 sessions. Activity was recorded on four 64-electrode Utah arrays: two in area 6v (ventral premotor cortex) and two in area 44 (inferior frontal gyrus, part of Broca's area). Each trial comprised an instructed delay (about 8\,s, sentence on screen) followed by a go cue and the attempted-speech period.
 
-\textbf{Average-over-sentence regression:} We used ridge regression to predict the average activity over a sentence for each channel from the GPT2-XL layer-22 representation of the sentence's last token. \cite{radford2019language} (previously found to have predictive power over the language network in fMRI). To separate GPT from sentence length, we fit a regression over length features (words, tokens, characters, duration, speaking rate). GPT yielded slightly higher correlations than length features alone in both areas (Table~\ref{tab:sentence}), although correlations were weak overall. These findings suggest that first) average activity from intra-cortical recordings demonstrates weak correlation with GPT2-XL features relative to average BOLD response over the language network and second) there is a weak encoding signal beyond sentence length features from average channel-wise activity motivating the need for a more expressive regression target.
+\textbf{Average-over-sentence regression:} We used ridge regression to predict the average activity over a sentence for each channel from the GPT2-XL layer-22 representation of the sentence's last token. \cite{radford2019language} (previously found to have predictive power over the language network in fMRI). To separate GPT from sentence length, we fit a regression over length features (words, tokens, characters, duration, speaking rate). GPT yielded slightly higher correlations than length features alone in both areas (Table~\ref{tab:sentence}), although correlations were weak overall. These findings suggest that first) average activity from intra-cortical recordings demonstrates weak correlation with GPT2-XL features relative to average BOLD response over the language network and second) there is an encoding signal beyond sentence length features from average channel-wise activity motivating the need for a more expressive regression target.
 
 \begin{table}[h]
 \centering
@@ -71,7 +71,7 @@ Control & 0.219 & 0.241 & 0.225 & 0.035 & 0.041 & 0.041 \\
 GPT & 0.198 & 0.185 & 0.160 & 0.042 & 0.044 & 0.037 \\
 \bottomrule
 \end{tabular}
-\caption{Word-level encoding: cross-validated $r$ (partial $r$ for $X \mid B$), averaged over the 128 channels of each area, at three lags from word onset.}
+\caption{Pearson $r$ for predicting average activity over a word using a feature ensemble including GPT2-XL embeddings, articulation, timing, etc.}
 \end{table}
 
 \bibliographystyle{unsrtnat}
