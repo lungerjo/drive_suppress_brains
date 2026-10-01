@@ -1,8 +1,8 @@
 \documentclass[11pt]{article}
 
 \usepackage{parskip}
+\usepackage{tabularx}
 \usepackage{wrapfig}
-\usepackage{booktabs}
 \usepackage[margin=1in]{geometry}
 \usepackage{amsmath, amssymb}
 \usepackage{graphicx}
@@ -14,25 +14,67 @@
 
 \setlist{itemsep=2pt, topsep=4pt}
 
-\title{Probing intracortical recordings from human speech and language areas with large language models}
+\title{Probing intracortical recordings from the language-related cortex with large language models}
 \date{}
 \author{}
 
 \begin{document}
 \maketitle
 
+\vspace{-1cm}
 \section{Introduction}
-Decoding phonemes from neural activity recorded in motor cortex has enabled the restoration of rapid communication to people with paralysis during both attempted and inner speech  \cite{willett2023speech}\cite{kunz2025innerspeech}. Increasingly, semantic encoding has been explored from recorded activity in language-related areas in the frontal and temporal cortex \cite{jamali2024semantic}\cite{cai2026language}, potentially unlocking speech-prosthetics in people with aphasia. One challenge unique to understanding semantic encoding is that unlike phonemes, the space of possible sentences and meanings is very large. Previous approaches have leveraged large language models to evaluate millions of sentences and extract those most likely to drive and suppress neural activity in fMRI \cite{tuckute2023driving}. Here, we take a first step toward adapting this technique to intracortical recordings. Using multi-unit activity recorded during attempted speech from ventral premotor cortex (area 6v) and inferior frontal gyrus (area 44) \cite{willett2023speech}, we test whether LLM features predict neural activity from intra-cortical recordings beyond articulation. This is a prerequisite for designing sentences that drive or suppress individual neurons in the language network.
+Decoding phonemes from neural activity recorded by intracortical electrodes in the motor cortex has enabled the restoration of rapid communication to people with paralysis during both attempted and inner speech  \cite{willett2023speech}\cite{kunz2025innerspeech}. Increasingly, semantic encoding has been explored from recorded activity in language-related areas not implicated in speech and articulation \cite{jamali2024semantic}\cite{cai2026language}, potentially unlocking communication prosthetics for stroke victims when the motor cortex has been damaged. Correlating neural activity record from functional Magnetic Resonance Imaging (fMRI) with hand-constructed linguistic tasks has been effective at partitioning the language network into increasingly granular functional sub-regions \cite{Price2012}\cite{clos2013tackling}. Intra-cortical recordings enable the further exploration of language tuning down to the scale of neural populations, yet motivate the need for further methods to help discover fine-grained linguistic features that specify regional functionality of neural populations within the recorded area. Previously, large language models (LLMs) have been used to evaluate millions of sentences in parallel and extract those most likely to drive and suppress average blood-oxygen-level-dependent (BOLD) response in the language network from fMRI \cite{tuckute2023driving}. Here we adopt a similar approach and use LLMs to efficiently find language features from intracortical recordings in the human language network.
 
-\section{Driving and suppressing language network fMRI with LLMs}
+\section{Background}
 
-The hidden activations of large language models have been shown to predict nearly all explainable variance in neural responses to sentences across multiple imaging modalities \cite{schrimpf2021neural}. \citet{tuckute2023driving} used these hidden activations to evaluate millions of sentences and extract those most likely to drive and suppress neural activity in fMRI. In that work, BOLD responses were acquired from five train participants who read a set of 1,000 diverse, corpus-extracted sentences and an  encoding model was trained via ridge regression and achieved a prediction performance of $r=.39$ (the noise ceiling is $r=.56$) when evaluated on average BOLD activity from the left-hemisphere language network during held-out sentences within the baseline set. Approximately 1.8 million sentences from nine diverse large-scale text corpora were evaluated and a set of 250 sentences extracted  that were predicted to elicit maximally strong activity in the language network.
+\begin{wraptable}{l}{0.64\textwidth}
+    \centering
+    \small
+    \setlength{\tabcolsep}{3pt}
+    \renewcommand{\arraystretch}{1.15}
+    \vspace{-.4cm}
+    \label{tab:ba44-clusters}
+    \begin{tabularx}{\linewidth}{
+        @{}l
+        >{\raggedright\arraybackslash}p{0.25\linewidth}
+        >{\raggedright\arraybackslash}X@{}
+    }
+        \toprule
+        Cluster & Location & Functional associations \\
+        \midrule
+        C1 & Posterior-dorsal &
+        Phonology, syntax, overt speech, action imagery \\
+        C2 & Anterior-dorsal &
+        Working memory, semantics, orthography, covert speech \\
+        C3 & Anterior-ventral &
+        Semantics, syntax, phonology, overt and covert speech \\
+        C4 & Posterior-ventral &
+        Action imagery, music comprehension and production,
+        rhythmic sequencing \\
+        C5 & Inferior frontal junction &
+        Cognitive control, task switching, working memory,
+        speech, phonology, semantics \\
+        \bottomrule
+    \end{tabularx}
+\end{wraptable}
 
-\section{Interpretable and information-optimal regression targets}
+\subsection{Review of anatomy and functional behavior of implanted regions}
+
+Recordings were obtained from two study participants in the BrianGate research consortium. Participant T20 had two intracortical arrays implanted in left-hemisphere 6v, two in 55b and two in Brodmann's Area (BA) 45. T12 had two arrays in left-hemisphere 6v and two in BA 44. BA 44 and BA 45 are sub-areas based on cellular organization of tissue within Broca's area \cite{brodmann1909vergleichende}. \citet{clos2013tackling} further subdivided left BA~44 into five
+clusters using meta-analytic coactivation-based parcellation (CBP).
+Their functional associations are summarized in
+Table~\ref{tab:ba44-clusters}.
+
+\subsection{Driving and suppressing average BOLD response in the human language network  with LLMs}
+
+The hidden activations of large language models have been shown to predict nearly all explainable variance in neural responses to sentences across multiple imaging modalities \cite{schrimpf2021neural}. \citet{tuckute2023driving} used these hidden activations to evaluate millions of sentences and extract those most likely to drive and suppress the average BOLD responses from five train participants who read a set of 1,000 diverse, corpus-extracted sentences. An encoding model was trained via ridge regression and achieved a prediction performance of $r=.39$ (the noise ceiling is $r=.56$) when evaluated on average BOLD activity from the left-hemisphere language network during held-out sentences within the baseline set. Approximately 1.8 million sentences from nine diverse large-scale text corpora were evaluated and a set of 250 sentences extracted  that were predicted to elicit maximally strong activity in the language network.
+
+\section{LLM-driven feature discovery from intra-cortical recordings from the human language-cortex}
 
 Due to the low spatial and temporal resolution of fMRI, fine-grained properties cannot be targeted beyond general increases in average BOLD response to entire sentences. A major aim of studying semantic encoding in the human language network is to uncover how the brain tunes to semantic structure at the level of individual neurons and semantic dynamics with a single-sentence. Therefore, we introduce interpretable and information optimal regression targets that will help uncover bio-mechanistically interpretable structure in language space.
 
-\section{LLM encodings of Brain-to-Text 2023}
+\section{Results}
+\subsection{LLM encdoings of Brain-to-Text 2024}
 
 Participant T12 from the brain-gate consortium\cite{willett2023speech} attempted to speak 9,680 sentences (9,562 unique) across 24 sessions. Activity was recorded on four 64-electrode Utah arrays: two in area 6v (ventral premotor cortex) and two in area 44 (inferior frontal gyrus, part of Broca's area). Each trial comprised an instructed delay (about 8\,s, sentence on screen) followed by a go cue and the attempted-speech period.
 
@@ -71,7 +113,7 @@ Control & 0.219 & 0.241 & 0.225 & 0.035 & 0.041 & 0.041 \\
 GPT & 0.198 & 0.185 & 0.160 & 0.042 & 0.044 & 0.037 \\
 \bottomrule
 \end{tabular}
-\caption{Pearson $r$ for predicting average activity over a word using a feature ensemble including GPT2-XL embeddings, articulation, timing, etc.}
+\caption{Pearson $r$ for predicting average channel-wise activity over a word using a feature ensemble including GPT2-XL embeddings, articulation, timing, etc.}
 \end{table}
 
 \bibliographystyle{unsrtnat}
