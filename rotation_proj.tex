@@ -11,6 +11,7 @@
 \usepackage{xcolor}
 \usepackage[super,sort&compress]{natbib} % drop "numbers" for author-year citations
 \usepackage[colorlinks=true, linkcolor=blue, citecolor=blue, urlcolor=blue]{hyperref}
+\newcommand{\bs}{\boldsymbol}
 
 \setlist{itemsep=2pt, topsep=4pt}
 
@@ -23,47 +24,7 @@
 
 \vspace{-1cm}
 \section{Introduction}
-Decoding phonemes from neural activity recorded by intracortical electrodes in the motor cortex has enabled the restoration of rapid communication to people with paralysis during both attempted and inner speech  \cite{willett2023speech}\cite{kunz2025innerspeech}. Increasingly, semantic encoding has been explored from recorded activity in language-related areas not implicated in speech and articulation \cite{jamali2024semantic}\cite{cai2026language}, potentially unlocking communication prosthetics for stroke victims when the motor cortex has been damaged. Correlating neural activity record from functional Magnetic Resonance Imaging (fMRI) with hand-constructed linguistic tasks has been effective at partitioning the language network into increasingly granular functional sub-regions \cite{Price2012}\cite{clos2013tackling}. Intra-cortical recordings enable the further exploration of language tuning down to the scale of neural populations, yet motivate the need for further methods to help discover fine-grained linguistic features that specify regional functionality of neural populations within the recorded area. Previously, large language models (LLMs) have been used to evaluate millions of sentences in parallel and extract those most likely to drive and suppress average blood-oxygen-level-dependent (BOLD) response in the language network from fMRI \cite{tuckute2023driving}. Here we adopt a similar approach and use LLMs to efficiently find language features from intracortical recordings in the human language network.
-
-\section{Background}
-
-\begin{wraptable}{l}{0.64\textwidth}
-    \centering
-    \small
-    \setlength{\tabcolsep}{3pt}
-    \renewcommand{\arraystretch}{1.15}
-    \vspace{-.4cm}
-    \label{tab:ba44-clusters}
-    \begin{tabularx}{\linewidth}{
-        @{}l
-        >{\raggedright\arraybackslash}p{0.25\linewidth}
-        >{\raggedright\arraybackslash}X@{}
-    }
-        \toprule
-        Cluster & Location & Functional associations \\
-        \midrule
-        C1 & Posterior-dorsal &
-        Phonology, syntax, overt speech, action imagery \\
-        C2 & Anterior-dorsal &
-        Working memory, semantics, orthography, covert speech \\
-        C3 & Anterior-ventral &
-        Semantics, syntax, phonology, overt and covert speech \\
-        C4 & Posterior-ventral &
-        Action imagery, music comprehension and production,
-        rhythmic sequencing \\
-        C5 & Inferior frontal junction &
-        Cognitive control, task switching, working memory,
-        speech, phonology, semantics \\
-        \bottomrule
-    \end{tabularx}
-\end{wraptable}
-
-\subsection{Review of anatomy and functional behavior of implanted regions}
-
-Recordings were obtained from two study participants in the BrianGate research consortium. Participant T20 had two intracortical arrays implanted in left-hemisphere 6v, two in 55b and two in Brodmann's Area (BA) 45. T12 had two arrays in left-hemisphere 6v and two in BA 44. BA 44 and BA 45 are sub-areas based on cellular organization of tissue within Broca's area \cite{brodmann1909vergleichende}. \citet{clos2013tackling} further subdivided left BA~44 into five
-clusters using meta-analytic coactivation-based parcellation (CBP).
-Their functional associations are summarized in
-Table~\ref{tab:ba44-clusters}.
+Decoding phonemes from neural activity recorded by intracortical electrodes in the motor cortex has enabled the restoration of rapid communication to people with paralysis during both attempted and inner speech  \cite{willett2023speech}\cite{kunz2025innerspeech}. Increasingly, semantic encoding has been explored from recorded activity in language-related areas not implicated in speech and articulation \cite{jamali2024semantic}\cite{cai2026language}, potentially unlocking communication prosthetics for stroke victims when the motor cortex has been damaged. Correlating neural activity record from functional Magnetic Resonance Imaging (fMRI) with hand-constructed linguistic tasks has been effective at partitioning the language network into increasingly granular functional sub-regions \cite{Price2012}\cite{clos2013tackling}. Intra-cortical recordings enable the further exploration of language tuning down to the scale of neural populations, yet motivate the need for further methods to help discover fine-grained linguistic features that specify regional functionality of neural populations within the recorded area. A growing body of literature uses large language models (LLMs) to speed-up this process, typically neural activity recorded from fMRI \cite{tuckute2023driving}. Here we adopt a similar approach and use LLMs to efficiently find language features from intracortical recordings in the human language network.
 
 \subsection{Driving and suppressing average BOLD response in the human language network  with LLMs}
 
@@ -73,8 +34,37 @@ The hidden activations of large language models have been shown to predict nearl
 
 Due to the low spatial and temporal resolution of fMRI, fine-grained properties cannot be targeted beyond general increases in average BOLD response to entire sentences. A major aim of studying semantic encoding in the human language network is to uncover how the brain tunes to semantic structure at the level of individual neurons and semantic dynamics with a single-sentence. Therefore, we introduce interpretable and information optimal regression targets that will help uncover bio-mechanistically interpretable structure in language space.
 
-\section{Results}
-\subsection{LLM encdoings of Brain-to-Text 2024}
+\bibliographystyle{unsrtnat}
+\bibliography{refs}
+
+\section{Appendix}
+
+\subsection{Survey of LLM-brain correlation methods}
+
+A large-scale demonstration that language-model representations predict human language-network responses was provided by  \citet{schrimpf2021neural}. In that work, the authors correlated LLM activations to fMRI recordings of sentence reading
+\cite{Pereira2018} and story listening \cite{Blank2014}.
+\begin{wraptable}{l}{0.6\textwidth}
+\vspace{-.3cm}
+\centering
+\begin{tabular}{lccc}
+\toprule
+ & Sentence & Sentence & Story \\ 
+ & Reading 1 & Reading 2 & Listening \\
+\midrule
+Participants & 9 & 6 & 5 \\
+Sentences & 384 & 243 & 1300 \\
+Noise ceiling & .32 & .32 & .2 \\
+LLM correlation & .32 & .32 & .064 \\
+Resolution & Voxels & Voxels & ROI \\
+\bottomrule
+\end{tabular}
+\caption{LLM-brain correlation from sentence comprehension fMRI.}
+\vspace{-.5cm}
+\label{tab:sentence}
+\end{wraptable}
+For the sentence reading dataset, each sentence appeared for four seconds, followed by four seconds of fixation, with an additional four seconds after each passage. Each participant saw every sentence three times across separate scanning sessions. An fMRI general linear model (GLM) estimated a response amplitude in eight seconds for each sentence at each voxel, accounting for the hemodynamic response. They averaged the three repetitions and selected language-responsive voxels using an independent sentences-versus-nonwords localizer. Thus, the prediction target was one response value per sentence per voxel over language-related voxels. A noise ceiling was estimated by predicting the BOLD responses of a target participant from the BOLD responses of non-target participants on held-out sentences using ordinary least squares (OLS) regression. Then OLS was used to fit the embeddings of GPTXL-2 over training sentences onto the average BOLD response of each subject during held-out sentences to obtain LLM correlation. They used five-fold cross-validation over sentences, fitting on 80\% and predicting the remaining 20\%. The two experiments were evaluated separately. For the story listening dataset, Five participants listened to the same eight stories, each approximately five minutes long. They averaged language-responsive voxels within each functional region of interest (ROI), producing 60 participant-specific ROI signals across five people. To account for the hemodynamic delay, they paired each fragment with BOLD activity four seconds later. The model processed the transcript with preceding story context. There was no repeated sentences within subjects and averaging there within. For each ROI, they correlated predicted and measured BOLD responses across test fragments and averaged across folds. While LLM predictions of BOLD activity during sentence reading approached the ceiling, predictions on story listening were relatively poor. This is likely due to averaging over multiple sentences within subject on reading, contributing to an increase in the noise ceiling and obtained correlation.
+
+\subsection{LLM prediction models of Brain-to-Text 2024}
 
 Participant T12 from the brain-gate consortium\cite{willett2023speech} attempted to speak 9,680 sentences (9,562 unique) across 24 sessions. Activity was recorded on four 64-electrode Utah arrays: two in area 6v (ventral premotor cortex) and two in area 44 (inferior frontal gyrus, part of Broca's area). Each trial comprised an instructed delay (about 8\,s, sentence on screen) followed by a go cue and the attempted-speech period.
 
@@ -116,7 +106,46 @@ GPT & 0.198 & 0.185 & 0.160 & 0.042 & 0.044 & 0.037 \\
 \caption{Pearson $r$ for predicting average channel-wise activity over a word using a feature ensemble including GPT2-XL embeddings, articulation, timing, etc.}
 \end{table}
 
-\bibliographystyle{unsrtnat}
-\bibliography{refs}
+\subsection{Review of anatomy and functional behavior of implanted regions}
+
+\begin{wraptable}{l}{0.64\textwidth}
+    \centering
+    \small
+    \setlength{\tabcolsep}{3pt}
+    \renewcommand{\arraystretch}{1.15}
+    \vspace{-.4cm}
+    \label{tab:ba44-clusters}
+    \begin{tabularx}{\linewidth}{
+        @{}l
+        >{\raggedright\arraybackslash}p{0.25\linewidth}
+        >{\raggedright\arraybackslash}X@{}
+    }
+        \toprule
+        Cluster & Location & Functional associations \\
+        \midrule
+        C1 & Posterior-dorsal &
+        Phonology, syntax, overt speech, action imagery \\
+        C2 & Anterior-dorsal &
+        Working memory, semantics, orthography, covert speech \\
+        C3 & Anterior-ventral &
+        Semantics, syntax, phonology, overt and covert speech \\
+        C4 & Posterior-ventral &
+        Action imagery, music comprehension and production,
+        rhythmic sequencing \\
+        C5 & Inferior frontal junction &
+        Cognitive control, task switching, working memory,
+        speech, phonology, semantics \\
+        \bottomrule
+    \end{tabularx}
+\end{wraptable}
+
+Recordings were obtained from two study participants in the BrianGate research consortium. Participant T20 had two intracortical arrays implanted in left-hemisphere 6v, two in 55b and two in Brodmann's Area (BA) 45. T12 had two arrays in left-hemisphere 6v and two in BA 44. BA 44 and BA 45 are sub-areas based on cellular organization of tissue within Broca's area \cite{brodmann1909vergleichende}. \citet{clos2013tackling} further subdivided left BA~44 into five
+clusters using meta-analytic coactivation-based parcellation (CBP).
+Their functional associations are summarized in
+Table~\ref{tab:ba44-clusters}.
+
 
 \end{document}
+
+
+
